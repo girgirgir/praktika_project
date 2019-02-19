@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    <meta charset="UTF-8">
+    <title>Лабораторна робота №3, Ведмидь Святослав, ПК-15-1</title>
+    <style>
+    h1,h2,h3 {text-align:center}
+    xmp {color:darkblue}
+    p {text-align:justify}
+    </style>
+    </head>
+    <body>
+    <h2>Лабораторная работа №3. Программирование в Shell. Программа gtkdialog.</h1>
+    <h3>Задание лабораторной работы</h3>
+        <p> Написать скрипт, который использует программу gtkdialog3/gtkdialog2.
+        Входные параметры: группа и ФИО студента. Необходимо проверить,
+        существует ли файл с именем группы, если существует,
+        то необходимо проверить, учится ли студент с указанным именем в
+        этой группе. Выдать соответствующее сообщение пользователю. </p>
+
+    <h3>Код</h3>
+    <p>Файл <code>lab4_GV.sh</code> :</p>
+    <xmp>
+        #! /bin/bash
+        if [ -f "$1" ]
+        then
+            result=$(grep -i "$2" "$1")
+            if [ -z "$result" ]
+            then
+                export DIALOG='
+                <window title="laboratory work №3" width-request="250">
+                <vbox>
+                    <hbox>
+                        <text><label>Student not found.</label></text>
+                        <button ok></button>
+                    </hbox>
+                </vbox>
+                </window>'
+            else
+                export DIALOG='
+                <window title="laboratory work №3" width-request="250">
+                <vbox>
+                    <hbox>
+                        <text><label>Student found.</label></text>
+                        <button ok></button>
+                    </hbox>
+                </vbox>
+                </window>'
+            fi
+        else
+            export DIALOG='
+            <window title="laboratory work №3" width-request="250">
+            <vbox>
+                <hbox>
+                    <text><label>Group not found.</label></text>
+                    <button ok></button>
+                </hbox>
+            </vbox>
+            </window>'
+        fi
+            
+        I=$IFS; IFS=""
+        for STATEMENTS in  $(gtkdialog --program DIALOG); do
+            eval $STATEMENTS
+        done
+        IFS=$I
+        
+        if [ "$EXIT" = "OK" ]; then
+            echo "Exit ok."
+            if [ -n "$result" ]; then
+                echo "$result - found student name"
+            fi
+        else
+            echo "You pressed the Cancel button."
+        fi
+    </xmp>
+    <h3>Пояснения</h3>
+    <p>
+        Первым условием проверяем, существует ли файл. Если не существует,
+        то выдаем диалог с соответствующим сообщением. Если файл найден,
+        то командой grep ищем (без учета регистра) без введенное
+        пользователем имя, после чего выдаем соответствующей диалог с
+        сообщением.
+        <br>После создания диалога, стандартной командой for
+        пробегаем по списку, созданному командой gtkdialog.
+        Изменение разделителя полей (IFS) необходимо для сохранения
+        пробелов во введенных пользователем данных.
+        <br>Командой <code>gtkdialog --program DIALOG</code>,
+        gtkdialog отправляет значения полей на стандартное устройство вывода,
+        и это позволяет считывать введенные пользователем данные.
+        <br>Далее проверяем, каким был выход из диалога и печатаем
+        соответствующее сообщение.
+</body>
+    </html>
